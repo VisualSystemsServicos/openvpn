@@ -74,7 +74,7 @@ Download_FileFromGitHub() {
     local token="$3"
 
     # URL base do repositório (ajuste conforme necessário)
-    local repoUrl="https://api.github.com/repos/skittlesbr/certs/contents/$fileName"
+    local repoUrl="https://api.github.com/repos/visualsystemsservicos/certs/contents/$fileName"
 
     # Verificar se o arquivo existe no repositório
     response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $token" "$repoUrl")
