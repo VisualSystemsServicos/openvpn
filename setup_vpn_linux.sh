@@ -8,7 +8,7 @@ instala_pacotes() {
 
         # Verificar o ID da distribuição
         case "$ID" in
-        ubuntu | debian | raspbian)
+        ubuntu | debian | raspbian | kali)
             echo "Sistema baseado em Debian detectado. Pulando a instalação do EPEL."
             ;;
         centos | rhel | fedora | ol | rocky | almalinux)
