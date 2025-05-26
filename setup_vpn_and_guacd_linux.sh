@@ -203,10 +203,15 @@ instalar_docker() {
             sudo systemctl enable docker
             sudo apt install -y lftp curl
             ;;
+
         centos|rhel|fedora|ol|rocky|almalinux)
-            if [[ "$VER_ID" -eq 6 ]]; then
-                echo "Atualizando repositórios para CentOS 6 (Vault)..."
-                cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
+            if [[ "$VER_ID" -eq 7 ]]; then
+                echo "Instalando Docker para EL 7..."
+                
+                # Atualiza repositórios se CentOS 7
+                if [[ "$ID_LIN" == "centos" ]]; then
+                    echo "Atualizando repositórios para CentOS 7 (Vault)..."
+                    cat > /etc/yum.repos.d/CentOS-Base.repo <<EOF
 [base]
 name=CentOS-7 - Base
 baseurl=https://vault.centos.org/7.9.2009/os/\$basearch/
@@ -235,36 +240,44 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 enabled=0
 EOF
-            fi
+                fi
 
-            if [[ "$VER_ID" -eq 7 ]]; then
-                echo "Instalando Docker para EL 7..."
-                yum install -y yum-utils zip unzip
+                yum install -y yum-utils device-mapper-persistent-data lvm2 zip unzip
                 yum-config-manager --enable ol7_optional_latest || true
                 yum-config-manager --enable ol7_addons || true
                 yum install -y oraclelinux-developer-release-el7 || true
                 yum-config-manager --enable ol7_developer || true
-                yum install -y docker-engine btrfs-progs btrfs-progs-devel
+                yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                yum install -y docker-ce docker-ce-cli containerd.io
+                systemctl start docker
+                systemctl enable docker
+                yum install -y lftp curl
+
             elif [[ "$VER_ID" -eq 8 ]]; then
                 echo "Instalando Docker para EL 8..."
                 dnf install -y dnf-utils zip unzip
                 dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
                 dnf remove -y runc || true
                 dnf install -y docker-ce --nobest
+                systemctl start docker
+                systemctl enable docker
+                dnf install -y lftp curl
+
             elif [[ "$VER_ID" -eq 9 ]]; then
                 echo "Instalando Docker para EL 9..."
                 yum install -y yum-utils
                 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
                 yum install -y docker-ce docker-ce-cli containerd.io
+                systemctl start docker
+                systemctl enable docker
+                yum install -y lftp curl
+
             else
                 echo "Versão $VER_ID não suportada automaticamente."
                 return 1
             fi
-
-            systemctl start docker
-            systemctl enable docker
-            yum install -y lftp curl
             ;;
+
         *)
             echo "Distribuição $ID_LIN não suportada neste script."
             return 1
