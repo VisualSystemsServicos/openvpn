@@ -363,15 +363,15 @@ instala_scripts_guacd_cron() {
 
     echo "Baixando scripts..."
     curl -k -H "Authorization: token $token" -o transfer_file_guacd_ftp.sh "$repo_base/transfer_file_guacd_ftp.sh"
-    curl -k -H "Authorization: token $token" -o clear_repo_guacamole.sh "$repo_base/clear_repo_guacd.sh"
+    curl -k -H "Authorization: token $token" -o clean_repo_guacamole.sh "$repo_base/clean_repo_guacd.sh"
 
     echo "Dando permissão de execução..."
     chmod +x transfer_file_guacd_ftp.sh
-    chmod +x clear_repo_guacamole.sh
+    chmod +x clean_repo_guacamole.sh
 
     echo "Configurando crontab..."
     (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/scripts/transfer_file_guacd_ftp.sh") | sort -u | crontab -
-    (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/scripts/clear_repo_guacamole.sh") | sort -u | crontab -
+    (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/scripts/clean_repo_guacamole.sh") | sort -u | crontab -
 
     echo "Scripts instalados e cron configurado com sucesso."
 }
