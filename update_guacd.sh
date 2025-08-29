@@ -49,40 +49,36 @@ instala_scripts_guacd_cron() {
     echo "Scripts instalados e cron configurado com sucesso."
 }
 
-read -p "Deseja atualizar o Guacd? (s/n): " resposta
-if [[ "$resposta" =~ ^[Ss]$ ]]; then
-    echo "Iniciando configuração do Guacd..."
+echo "Iniciando configuração do Guacd..."
 
-    # Verificar se a variável git_token já possui valor
-    if [[ -z "$git_token" ]]; then
-        # Solicitar o token do GitHub
-        read -sp "Digite o token GitHub: " git_token
-        echo
-    fi
+# Recebe o token como parâmetro
+git_token="$1"
 
-    # Parando e removendo o contêiner existente, se houver
-    docker stop guacd_vss
-    docker rm guacd_vss
-
-    # Configurando guacd
-    configura_guacd
-
-    # Removendo scripts antigos, se existirem
-    rm -rf /opt/scripts/transfer_file_guacd_ftp.sh
-    rm -rf /opt/scripts/clean_repo_guacd.sh
-    rm -rf /opt/scripts/clear_repo_guacd.sh
-    rm -rf /opt/scripts/kill_services_guacd.sh
-
-    # Instalando scripts do Guacd e configurando o cron
-    instala_scripts_guacd_cron
-
-    echo "Update do Guacd concluída com sucesso!"
-
-    # Remove o script
-    sudo rm -rf ./update_guacd.sh
-
-else
-    echo "Configuração do Guacd cancelada. Finalizando script."
-    # Remove o script
-    sudo rm -rf ./update_guacd.sh
+# Verificar se a variável git_token já possui valor
+if [[ -z "$git_token" ]]; then
+    # Solicitar o token do GitHub
+    read -sp "Digite o token GitHub: " git_token
+    echo
 fi
+
+# Parando e removendo o contêiner existente, se houver
+docker stop guacd_vss
+docker rm guacd_vss
+
+# Configurando guacd
+configura_guacd
+
+# Removendo scripts antigos, se existirem
+rm -rf /opt/scripts/transfer_file_guacd_ftp.sh
+rm -rf /opt/scripts/clean_repo_guacd.sh
+rm -rf /opt/scripts/clear_repo_guacd.sh
+rm -rf /opt/scripts/kill_services_guacd.sh
+
+# Instalando scripts do Guacd e configurando o cron
+instala_scripts_guacd_cron
+
+echo "Update do Guacd concluída com sucesso!"
+
+# Remove o script
+sudo rm -rf ./update_guacd.sh
+
