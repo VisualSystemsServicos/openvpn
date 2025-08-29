@@ -41,13 +41,6 @@ instala_scripts_guacd_cron() {
     chmod +x kill_services_guacd.sh
     chmod 600 .env
 
-    echo "Configurando crontab..."
-    (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/scripts/transfer_file_guacd_ftp.sh") | sort -u | crontab -
-    (crontab -l 2>/dev/null; echo "*/10 * * * * /opt/scripts/clean_repo_guacd.sh") | sort -u | crontab -
-    (crontab -l 2>/dev/null; echo "*/10 * * * * /opt/scripts/kill_services_guacd.sh") | sort -u | crontab -
-
-    echo "Configurando crontab..."
-
     # Exporta crontab atual + novas entradas, evitando duplicatas
     tmp_cron=$(mktemp)
 
