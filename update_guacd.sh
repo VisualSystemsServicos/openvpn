@@ -46,6 +46,25 @@ instala_scripts_guacd_cron() {
     (crontab -l 2>/dev/null; echo "*/10 * * * * /opt/scripts/clean_repo_guacd.sh") | sort -u | crontab -
     (crontab -l 2>/dev/null; echo "*/10 * * * * /opt/scripts/kill_services_guacd.sh") | sort -u | crontab -
 
+    echo "Configurando crontab..."
+
+    # Exporta crontab atual + novas entradas, evitando duplicatas
+    tmp_cron=$(mktemp)
+
+    # Cria cabeçalho se não existir
+    crontab -l 2>/dev/null > "$tmp_cron"
+    grep -qxF "#### VSS Acesso Seguro" "$tmp_cron" || echo "#### VSS Acesso Seguro" >> "$tmp_cron"
+
+    # Adiciona tarefas se não existirem
+    grep -qxF "*/5 * * * * /opt/scripts/transfer_file_guacd_ftp.sh" "$tmp_cron" || echo "*/5 * * * * /opt/scripts/transfer_file_guacd_ftp.sh" >> "$tmp_cron"
+    grep -qxF "*/10 * * * * /opt/scripts/clean_repo_guacamole.sh" "$tmp_cron" || echo "*/10 * * * * /opt/scripts/clean_repo_guacamole.sh" >> "$tmp_cron"
+    grep -qxF "*/10 * * * * /opt/scripts/kill_services_guacd.sh" "$tmp_cron" || echo "*/10 * * * * /opt/scripts/kill_services_guacd.sh" >> "$tmp_cron"
+
+    # Recarrega crontab
+    crontab "$tmp_cron"
+    rm -f "$tmp_cron"
+    echo "Crontab atualizado com sucesso!"
+
     echo "Scripts instalados e cron configurado com sucesso."
 }
 
