@@ -69,10 +69,7 @@ docker rm guacd_vss
 configura_guacd
 
 # Removendo scripts antigos, se existirem
-rm -rf /opt/scripts/transfer_file_guacd_ftp.sh
-rm -rf /opt/scripts/clean_repo_guacd.sh
-rm -rf /opt/scripts/clear_repo_guacd.sh
-rm -rf /opt/scripts/kill_services_guacd.sh
+rm -rf /opt/scripts/*
 
 # Instalando scripts do Guacd e configurando o cron
 instala_scripts_guacd_cron
