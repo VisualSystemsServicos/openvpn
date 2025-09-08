@@ -32,13 +32,11 @@ instala_scripts_guacd_cron() {
     echo "Baixando scripts..."
     curl -k -H "Authorization: token $token" -o transfer_file_guacd_ftp.sh "$repo_base/transfer_file_guacd_ftp.sh"
     curl -k -H "Authorization: token $token" -o clean_repo_guacd.sh "$repo_base/clean_repo_guacd.sh"
-    curl -k -H "Authorization: token $token" -o kill_services_guacd.sh "$repo_base/kill_services_guacd.sh"
     curl -k -H "Authorization: token $token" -o .env "$repo_base/.env"
 
     echo "Dando permissão de execução..."
     chmod +x transfer_file_guacd_ftp.sh
     chmod +x clean_repo_guacd.sh
-    chmod +x kill_services_guacd.sh
     chmod 600 .env
 
     echo "Scripts instalados com sucesso."
