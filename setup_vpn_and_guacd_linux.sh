@@ -344,7 +344,7 @@ configura_guacd() {
         -v /opt/guacd/record:/var/guacamole/record:rw \
         -v /opt/guacd/text_log:/var/guacamole/text_log:rw \
         -v /opt/guacd/repo_guacamole:/REPO_Guacamole \
-        guacamole/guacd:1.5.5
+        guacamole/guacd:1.6.0
 
     echo "Ajustando permissões dos diretórios..."
     sudo chmod 777 /opt/guacd/{record,text_log,repo_guacamole}
@@ -363,17 +363,28 @@ instala_scripts_guacd_cron() {
 
     echo "Baixando scripts..."
     curl -k -H "Authorization: token $token" -o transfer_file_guacd_ftp.sh "$repo_base/transfer_file_guacd_ftp.sh"
-    curl -k -H "Authorization: token $token" -o clean_repo_guacamole.sh "$repo_base/clean_repo_guacd.sh"
+    curl -k -H "Authorization: token $token" -o clean_repo_guacd.sh "$repo_base/clean_repo_guacd.sh"
     curl -k -H "Authorization: token $token" -o .env "$repo_base/.env"
 
     echo "Dando permissão de execução..."
     chmod +x transfer_file_guacd_ftp.sh
-    chmod +x clean_repo_guacamole.sh
+    chmod +x clean_repo_guacd.sh
     chmod 600 .env
 
     echo "Configurando crontab..."
-    (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/scripts/transfer_file_guacd_ftp.sh") | sort -u | crontab -
-    (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/scripts/clean_repo_guacamole.sh") | sort -u | crontab -
+
+    # Define o bloco de cron
+    CRON_BLOCK=$(cat <<EOF
+#### VSS Acesso Seguro
+*/5 * * * * /opt/scripts/transfer_file_guacd_ftp.sh
+*/10 * * * * /opt/scripts/clean_repo_guacd.sh
+EOF
+)
+
+    # Só adiciona se o cabeçalho ainda não existir
+    if ! crontab -l 2>/dev/null | grep -q "#### VSS Acesso Seguro"; then
+        (crontab -l 2>/dev/null; echo "$CRON_BLOCK") | awk '!seen[$0]++' | crontab -
+    fi
 
     echo "Scripts instalados e cron configurado com sucesso."
 }
