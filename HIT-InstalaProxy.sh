@@ -296,7 +296,7 @@ DBUser=zabbix
 # Mandatory: no
 # Range: 0-1000
 # Default:
-# StartPollers=5
+StartPollers=20
 
 ### Option: StartIPMIPollers
 #	Number of pre-forked instances of IPMI pollers.
@@ -315,7 +315,7 @@ DBUser=zabbix
 # Mandatory: no
 # Range: 0-1000
 # Default:
-# StartPollersUnreachable=1
+StartPollersUnreachable=10
 
 ### Option: StartTrappers
 #	Number of pre-forked instances of trappers.
@@ -332,7 +332,7 @@ DBUser=zabbix
 # Mandatory: no
 # Range: 0-1000
 # Default:
-# StartPingers=1
+StartPingers=20
 
 ### Option: StartDiscoverers
 #	Number of pre-forked instances of discoverers.
@@ -464,7 +464,7 @@ SNMPTrapperFile=/var/log/snmptrap/snmptrap.log
 # Mandatory: no
 # Range: 128K-8G
 # Default:
-# CacheSize=8M
+CacheSize=128M
 
 ### Option: StartDBSyncers
 #	Number of pre-forked instances of DB Syncers.
@@ -1425,6 +1425,7 @@ DBUser=zabbix
 # Range: 1-3600
 # Default:
 # DataSenderFrequency=1
+DataSenderFrequency=30
 
 ############ ADVANCED PARAMETERS ################
 
