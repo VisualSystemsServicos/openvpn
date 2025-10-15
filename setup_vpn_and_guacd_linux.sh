@@ -1,6 +1,26 @@
 #!/bin/bash
 
 #########################################################################################
+##############################    PARAMETROS INICIAIS    ################################
+#########################################################################################
+
+# Verifica se os dois argumentos foram fornecidos
+if [ $# -lt 2 ]; then
+    read -p "Digite o nome do certificado: " cert_name
+    read -sp "Digite o Token do GitHub: " git_token
+else
+    # Recebe parâmetros da linha de execução
+    cert_name="$1"
+    git_token="$2"
+    resposta_guacd="s"
+    resposta_openvpn="s"
+fi
+
+# Exibe os valores para conferência (opcional)
+echo "Nome do certificado: $cert_name"
+echo "Token recebido com sucesso."
+
+#########################################################################################
 ################################    CONFIGURA OPENVPN    ################################
 #########################################################################################
 
@@ -105,8 +125,11 @@ Download_FileFromGitHub() {
     fi
 }
 
-read -p "Deseja instalar e configurar o OpenVPN? (s/n): " resposta
-if [[ "$resposta" =~ ^[Ss]$ ]]; then
+if [ -z "$resposta_openvpn" ]; then
+    read -p "Deseja instalar e configurar o OpenVPN? (s/n): " resposta_openvpn
+fi
+
+if [[ "$resposta_openvpn" =~ ^[Ss]$ ]]; then
     echo "Iniciando instalação e configuração do OpenVPN..."
 
     # Executa a função para instalar os pacotes
@@ -119,13 +142,6 @@ if [[ "$resposta" =~ ^[Ss]$ ]]; then
     else
         echo "OpenVPN instalado com sucesso."
     fi
-
-    # Solicitar o nome do certificado ao usuário
-    read -p "Digite o nome do usuário: " cert_name
-
-    # Solicitar o token do GitHub
-    read -sp "Digite o token GitHub: " git_token
-    echo
 
     # Diretório para salvar os arquivos do cliente
     client_dir="/etc/openvpn/client"
@@ -389,8 +405,11 @@ EOF
     echo "Scripts instalados e cron configurado com sucesso."
 }
 
-read -p "Deseja configurar o Guacd? (s/n): " resposta
-if [[ "$resposta" =~ ^[Ss]$ ]]; then
+if [ -z "$reposta_guacd" ]; then
+    read -p "Deseja configurar o Guacd? (s/n): " resposta_guacd
+fi
+
+if [[ "$resposta_guacd" =~ ^[Ss]$ ]]; then
     echo "Iniciando configuração do Guacd..."
 
     # Verificar se a variável git_token já possui valor
