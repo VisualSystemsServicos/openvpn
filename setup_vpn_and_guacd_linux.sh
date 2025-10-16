@@ -405,7 +405,7 @@ EOF
     echo "Scripts instalados e cron configurado com sucesso."
 }
 
-if [ -z "$reposta_guacd" ]; then
+if [ -z "$resposta_guacd" ]; then
     read -p "Deseja configurar o Guacd? (s/n): " resposta_guacd
 fi
 
