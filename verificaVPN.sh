@@ -5,6 +5,14 @@ VPN_GATEWAY="10.255.253.1"
 VPN_PORT="1194"
 VPN_DIR="/etc/openvpn/client"
 VPN_FILES=("ca.crt" "configura_openvpn.sh" "ta.key" "config.ovpn" "connect_vpn.sh")
+LOG_FILE="/tmp/verificaVPN.log"
+
+# Redireciona saída padrão e erros para o log + tela
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+echo "====================================="
+echo " Execução do script em: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "====================================="
 
 # Função para verificar placa de rede
 check_network_interface() {
@@ -14,7 +22,7 @@ check_network_interface() {
         echo "Interface de rede $VPN_GATEWAY encontrada."
         return 0
     else
-        echo "Erro: Interface de rede $VPN_GATEWAY nao encontrada."
+        echo "Interface de rede $VPN_GATEWAY nao encontrada."
         return 1
     fi
 }
@@ -88,7 +96,7 @@ check_firewall() {
 }
 
 start_process_vpn() {
-    echo -e "\n[2.4] Subindo serviço do OpenVPN..."
+    echo -e "Subindo serviço do OpenVPN..."
     cd $VPN_DIR || { echo "Diretório $VPN_DIR não encontrado"; exit 1; }
 
     if [ -x "./connect_vpn.sh" ]; then
@@ -112,9 +120,11 @@ restart_process_vpn() {
         start_process_vpn
 
     elif [ "$count" -eq 1 ]; then
-        echo "Apenas 1 processo OpenVPN ativo. Reiniciando..."
-        sudo pkill openvpn
-        echo "Processo encerrado"
+        local pid=$(pgrep openvpn)
+        echo "Apenas 1 processo OpenVPN ativo (PID: $pid). Reiniciando..."
+        sudo kill -9 "$pid"
+        sleep 2
+        echo "Processo $pid encerrado."
         start_process_vpn
 
     else
