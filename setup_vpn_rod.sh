@@ -114,13 +114,15 @@ Download_FileFromGitHub() {
         echo "Erro: O arquivo $fileName não foi encontrado no repositório."
         exit 1
     elif [[ "$response" -eq 200 ]]; then
-        # Baixar o arquivo se ele existir
+        # Baixar o arquivo para /tmp primeiro, depois mover com sudo
+        local tmpFile="/tmp/$(basename $fileName)"
         curl -H "Authorization: Bearer $token" \
              -H "Accept: application/vnd.github.v3.raw" \
-             -o "$destinationPath" \
+             -o "$tmpFile" \
              "$repoUrl"
 
         if [[ $? -eq 0 ]]; then
+            sudo_cmd mv "$tmpFile" "$destinationPath"
             echo "$fileName baixado com sucesso."
         else
             echo "Erro ao baixar $fileName. Verifique o token e o nome do repositório."
