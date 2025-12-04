@@ -1,7 +1,11 @@
 #!/bin/bash
 
-echo "b7&$Lpsb4H1c8$aM4btY3" | sudo -S su - hitfy -c "sudo su -" 
-
+# Senha do sudo para comandos automatizados
+SUDO_PASS="b7&\$Lpsb4H1c8\$aM4btY3"
+# Função para executar comandos com sudo usando a senha
+sudo_cmd() {
+    echo "$SUDO_PASS" | sudo -S "$@"
+}
 
 #########################################################################################
 ##############################    PARAMETROS INICIAIS    ################################
@@ -63,9 +67,9 @@ instala_pacotes() {
                 esac
 
                 # Tentar instalar o EPEL diretamente via gerenciador de pacotes
-                if ! sudo yum install -y epel-release; then
+                if ! sudo_cmd yum install -y epel-release; then
                     echo "Falha ao instalar o repositório EPEL. Baixando o pacote RPM..."
-                    sudo yum install -y "$epel_url"
+                    sudo_cmd yum install -y "$epel_url"
                 fi
             else
                 echo "Repositório EPEL já está instalado."
@@ -85,9 +89,9 @@ instala_pacotes() {
     if ! command -v openvpn &>/dev/null; then
         echo "OpenVPN não encontrado. Instalando o OpenVPN..."
         if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ] || [ "$ID" = "raspbian" ]; then
-            sudo apt update && sudo apt install -y openvpn lftp curl
+            sudo_cmd apt update && sudo_cmd apt install -y openvpn lftp curl
         elif [ "$ID" = "centos" ] || [ "$ID" = "rhel" ] || [ "$ID" = "fedora" ] || [ "$ID" = "ol" ] || [ "$ID" = "rocky" ] || [ "$ID" = "almalinux" ]; then
-            sudo yum install -y openvpn lftp curl
+            sudo_cmd yum install -y openvpn lftp curl
         fi
     else
         echo "OpenVPN já está instalado."
@@ -150,7 +154,7 @@ if [[ "$resposta_openvpn" =~ ^[Ss]$ ]]; then
     client_dir="/etc/openvpn/client"
 
     # Criar o diretório caso não exista
-    sudo mkdir -p "$client_dir"
+    sudo_cmd mkdir -p "$client_dir"
 
     # Lista dos arquivos necessários
     arquivos=("ca.crt" "config.ovpn" "ta.key" "$cert_name.crt" "$cert_name.key" "configura_openvpn.sh" "connect_vpn.sh")
@@ -171,14 +175,14 @@ if [[ "$resposta_openvpn" =~ ^[Ss]$ ]]; then
     done
 
     # Mudar permissão e executar o script configura_openvpn.sh com o nome do certificado
-    sudo chmod +x "$client_dir/configura_openvpn.sh"
+    sudo_cmd chmod +x "$client_dir/configura_openvpn.sh"
     echo "Executando configura_openvpn.sh com o nome do certificado $cert_name..."
-    echo "$cert_name" | sudo "$client_dir/configura_openvpn.sh"
+    echo "$cert_name" | sudo_cmd "$client_dir/configura_openvpn.sh"
 
     # Mudar permissão e executar o script connect_vpn.sh
-    sudo chmod +x "$client_dir/connect_vpn.sh"
+    sudo_cmd chmod +x "$client_dir/connect_vpn.sh"
     echo "Conectando à VPN..."
-    sudo "$client_dir/connect_vpn.sh"
+    sudo_cmd "$client_dir/connect_vpn.sh"
 
     echo "Configuração OpenVPN concluída!"
 
@@ -207,20 +211,20 @@ instalar_docker() {
     case "$ID_LIN" in
         ubuntu|debian)
             echo "Instalando Docker para $ID_LIN..."
-            sudo apt-get update
-            sudo apt-get install -y ca-certificates curl
-            sudo install -m 0755 -d /etc/apt/keyrings
-            sudo curl -fsSL https://download.docker.com/linux/$ID_LIN/gpg -o /etc/apt/keyrings/docker.asc
-            sudo chmod a+r /etc/apt/keyrings/docker.asc
+            sudo_cmd apt-get update
+            sudo_cmd apt-get install -y ca-certificates curl
+            sudo_cmd install -m 0755 -d /etc/apt/keyrings
+            sudo_cmd curl -fsSL https://download.docker.com/linux/$ID_LIN/gpg -o /etc/apt/keyrings/docker.asc
+            sudo_cmd chmod a+r /etc/apt/keyrings/docker.asc
             echo \
               "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/$ID_LIN \
               $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-              sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-            sudo service docker start
-            sudo systemctl enable docker
-            sudo apt install -y lftp curl
+              sudo_cmd tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo_cmd apt-get update
+            sudo_cmd apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo_cmd service docker start
+            sudo_cmd systemctl enable docker
+            sudo_cmd apt install -y lftp curl
             ;;
 
         centos|rhel|fedora|ol|rocky|almalinux)
@@ -328,18 +332,18 @@ verifica_firewall() {
     porta="22822"
 
     # Verifica se firewalld está instalado e ativo
-    if command -v firewall-cmd &>/dev/null && sudo systemctl is-active --quiet firewalld; then
+    if command -v firewall-cmd &>/dev/null && sudo_cmd systemctl is-active --quiet firewalld; then
         echo "firewalld detectado e ativo. Configurando a porta $porta/tcp..."
-        sudo firewall-cmd --permanent --add-port=${porta}/tcp
-        sudo firewall-cmd --reload
+        sudo_cmd firewall-cmd --permanent --add-port=${porta}/tcp
+        sudo_cmd firewall-cmd --reload
         echo "Porta $porta/tcp adicionada ao firewalld."
         return
     fi
 
     # Verifica se ufw está instalado e ativo
-    if command -v ufw &>/dev/null && sudo ufw status | grep -q "Status: active"; then
+    if command -v ufw &>/dev/null && sudo_cmd ufw status | grep -q "Status: active"; then
         echo "ufw detectado e ativo. Configurando a porta $porta/tcp..."
-        sudo ufw allow ${porta}/tcp
+        sudo_cmd ufw allow ${porta}/tcp
         echo "Porta $porta/tcp adicionada ao ufw."
         return
     fi
@@ -350,14 +354,14 @@ verifica_firewall() {
 configura_guacd() {
     echo "Configurando diretórios para o Guacd..."
 
-    sudo mkdir -p /opt/guacd/{drive,record,text_log,repo_guacamole}
-    sudo mkdir -p /opt/scripts
-    sudo chmod 777 /opt/scripts
+    sudo_cmd mkdir -p /opt/guacd/{drive,record,text_log,repo_guacamole}
+    sudo_cmd mkdir -p /opt/scripts
+    sudo_cmd chmod 777 /opt/scripts
 
     cd /opt/guacd || { echo "Erro ao acessar /opt/guacd"; exit 1; }
 
     echo "Executando o contêiner Docker do Guacd..."
-    sudo docker run --restart=always --name guacd_vss -d \
+    sudo_cmd docker run --restart=always --name guacd_vss -d \
         -p 22822:4822 \
         -v /opt/guacd/drive:/drive:rw \
         -v /opt/guacd/record:/var/guacamole/record:rw \
@@ -366,8 +370,8 @@ configura_guacd() {
         guacamole/guacd:1.6.0
 
     echo "Ajustando permissões dos diretórios..."
-    sudo chmod 777 /opt/guacd/{record,text_log,repo_guacamole}
-    sudo chown daemon:daemon /opt/guacd/{record,text_log}
+    sudo_cmd chmod 777 /opt/guacd/{record,text_log,repo_guacamole}
+    sudo_cmd chown daemon:daemon /opt/guacd/{record,text_log}
 
     echo "Guacd configurado com sucesso!"
 }
@@ -450,10 +454,10 @@ if [[ "$resposta_guacd" =~ ^[Ss]$ ]]; then
     echo "Finalizando script de configuração do OpenVPN e Guacd."
 
     # Remove o script
-    sudo rm -rf ./setup_vpn_and_guacd_linux.sh
+    sudo_cmd rm -rf ./setup_vpn_and_guacd_linux.sh
 
 else
     echo "Configuração do Guacd cancelada. Finalizando script."
     # Remove o script
-    sudo rm -rf ./setup_vpn_and_guacd_linux.sh
+    sudo_cmd rm -rf ./setup_vpn_and_guacd_linux.sh
 fi
